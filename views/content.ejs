@@ -1,0 +1,15 @@
+<%- include('header') %>
+
+<div class="ui cards">
+<% records.forEach((record) => { %>
+  <div class="card">
+    <div class="content">
+      <div class="header"><%= record.title %></div>
+      <div class="meta"><%= record.updateTime %></div>
+      <div class="description"><%= record.tel %></div>
+    </div>
+  </div>
+<% }) %>
+</div>
+
+<%- include('footer') %>

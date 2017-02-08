@@ -1,0 +1,21 @@
+{
+  "name": "xmfish",
+  "version": "0.0.1",
+  "description": "Web Crawler",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "adolt",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "ejs": "^2.5.5",
+    "eventproxy": "^0.3.5",
+    "express": "^4.14.1",
+    "superagent": "^3.4.1"
+  }
+}
