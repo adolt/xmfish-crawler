@@ -2,6 +2,12 @@
 simple web crawler using nodejs
 
 # Install
+`mkdir xmfish-crawler`
+
+`cd xmfish-crawler`
+
+`git init`
+
 `git pull https://github.com/adolt/xmfish-crawler.git`
 
 `npm i --save`
