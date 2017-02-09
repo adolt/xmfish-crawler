@@ -3,6 +3,10 @@ const express = require('express');
 const superagent = require('superagent');
 const cheerio = require('cheerio');
 const eventproxy = require('eventproxy');
+const he = require('he');
+
+
+const utils = require('./lib/utils');
 
 const app = express();
 const ep = eventproxy.create();
@@ -17,10 +21,10 @@ const rentCode = {
     '20-30': 200,
     '30-50': 300,
     '50': 500
-}
+};
 
 const baseUrl = 'http://fangzi.xmfish.com';
-const maxFetchCount = 6; // 并发数 >6 时挂掉
+const maxFetchCount = 2; // 并发数 >6 时挂掉
 
 // 设置模板目录
 app.set('views', path.join(__dirname, 'views'));
@@ -38,7 +42,7 @@ app.get('/', (req, res, next) => {
 
     superagent.get(baseUrl + queryStr)
         .end(ep.doneLater('query', (sres) => {
-            var $ = cheerio.load(sres.text);
+            var $ = cheerio.load(sres.text, { decodeEntities: true });
 
             var urls = [];
             Array.prototype.slice.call($('.list-img a')).slice(0, maxFetchCount).forEach((cur) => {
@@ -60,7 +64,10 @@ app.get('/', (req, res, next) => {
                     return {
                         title: $('.secondMain .hd h3').text(),
                         updateTime: $('.secondMain .hd span').eq(0).text(),
-                        tel: 'Tel：' + $('.secondTel').text()
+                        imgUrl: $('.secondFocus .con li').eq(0).children().eq(0).attr('src'),
+                        labels: he.decode($('div[class=fl]>table>tr>td>span').eq(8).html().replace(/	|\s/gi, '')).split(/\s/gi).slice(0, -1),
+                        basicInfo: utils.formatBasicInfo($),
+                        description: $('.infoContent').html()
                     };
 
                 }));
@@ -68,22 +75,18 @@ app.get('/', (req, res, next) => {
     });
 
     ep.after('fetch_all', maxFetchCount, (records) => {
-        
+
         res.render('content', {
-        	records: records
+            records: records
         });
-    })
+    });
 
     ep.fail((err) => {
         next(err);
     });
 
-
-
-
-
 });
 
 app.listen(3000, () => {
     console.log('Server started, listening port 3000.');
-})
+});

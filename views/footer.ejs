@@ -1,2 +1,14 @@
-  </body>
+	</div>
+	<%- include('components/descriptionModal') %>
+	<script>
+		$(function($) {
+			$('div .ui .animated').on('click', function(e) {
+				var $target = $(this);
+				let description = $target.next().text();
+				$('#modalContent').html(description);
+				$('.modal').modal('show');
+			});
+		});
+	</script>
+</body>
 </html

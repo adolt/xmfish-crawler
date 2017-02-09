@@ -4,7 +4,7 @@
   "description": "Web Crawler",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "supervisor --harmony index"
   },
   "keywords": [
     "nodejs"
@@ -16,6 +16,8 @@
     "ejs": "^2.5.5",
     "eventproxy": "^0.3.5",
     "express": "^4.14.1",
-    "superagent": "^3.4.1"
+    "he": "^1.1.1",
+    "superagent": "^3.4.1",
+    "supervisor": "^0.12.0"
   }
 }
