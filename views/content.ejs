@@ -1,15 +1,55 @@
 <%- include('header') %>
-
-<div class="ui cards">
-<% records.forEach((record) => { %>
-  <div class="card">
-    <div class="content">
-      <div class="header"><%= record.title %></div>
-      <div class="meta"><%= record.updateTime %></div>
-      <div class="description"><%= record.tel %></div>
-    </div>
-  </div>
-<% }) %>
+<div class="ui centered row">
+    <h1 class="ui teal header">Crawler for xmfish</h1>
 </div>
-
+<div class="ui horizontal divider header">
+    <i class="bar chart icon"></i> Information
+</div>
+<div class="ui row">
+    <div class="ui two wide column"></div>
+    <div class="ui twelve wide column">
+        <div class="ui items">
+            <% records.forEach((record) => { %>
+            <div class="item">
+                <div class="ui small image">
+                    <img src="<%= record.imgUrl %>">
+                </div>
+                <div class="content">
+                    <div class="header">
+                        <%= record.title %>
+                    </div>
+                    <div class="meta">
+                        <span><%= record.updateTime %></span>
+                    </div>
+                    <div class="description">
+                        <div class="ui horizontal list">
+                            <% for(let attr of Object.keys(record.basicInfo)) { %>
+                            <div class="item">
+                                <div class="content">
+                                    <a class="ui label">
+                                        <%= record.basicInfo[attr] %>
+                                    </a>
+                                </div>
+                            </div>
+                            <% } %>
+                        </div>
+                        <p>
+                            <% record.labels.forEach((label) => { %>
+                            <a class="ui basic label">
+                                <%= label %>
+                            </a>
+                            <% }) %>
+                            <br>
+                        </p>
+                        <div class="ui hidden divider">
+                            Description
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+    </div>
+    <div class="ui two wide column"></div>
+</div>
 <%- include('footer') %>
