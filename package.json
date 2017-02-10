@@ -4,7 +4,7 @@
   "description": "Web Crawler",
   "main": "index.js",
   "scripts": {
-    "run": "supervisor --harmony index"
+    "start": "supervisor --harmony index"
   },
   "keywords": [
     "nodejs"

@@ -5,7 +5,6 @@ const cheerio = require('cheerio');
 const eventproxy = require('eventproxy');
 const he = require('he');
 
-
 const utils = require('./lib/utils');
 
 const app = express();
