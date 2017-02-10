@@ -1,0 +1,16 @@
+<%- include('header') %>
+
+<%- include('filter') %>
+
+<div class="ui horizontal divider">
+    Information
+</div>
+<div class="ui row">
+    <div class="ui two wide column"></div>
+    <div class="ui twelve wide column">
+    	<%- include('content', {records: records}) %>
+    </div>
+    <div class="ui two wide column"></div>
+</div>
+
+<%- include('footer') %>

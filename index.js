@@ -23,7 +23,18 @@ const rentCode = {
 };
 
 const baseUrl = 'http://fangzi.xmfish.com';
-const maxFetchCount = 2; // 并发数 >6 时挂掉
+const maxFetchCount = 6; // 并发数 >6 时挂掉
+
+var curCnt = 1;
+var rentInfo = [];
+// var ret = [];
+
+// 组装查询参数(后续界面查询使用)
+var rent = '',
+    keywords = '',
+    pageIndex = '1';
+
+var queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rent}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
 
 // 设置模板目录
 app.set('views', path.join(__dirname, 'views'));
@@ -32,14 +43,7 @@ app.set('view engine', 'ejs');
 
 app.get('/', (req, res, next) => {
 
-    // 组装查询参数(后续界面查询使用)
-    var rent = '',
-        keywords = '',
-        pageIndex = '1';
-
-    var queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rent}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
-
-    superagent.get(baseUrl + queryStr)
+    ep.on('fetch', superagent.get(baseUrl + queryStr)
         .end(ep.doneLater('query', (sres) => {
             var $ = cheerio.load(sres.text, { decodeEntities: true });
 
@@ -50,7 +54,7 @@ app.get('/', (req, res, next) => {
             });
 
             return urls;
-        }));
+        })));
 
     ep.on('query', (urls) => {
         urls.forEach((curUrl) => {
@@ -64,7 +68,7 @@ app.get('/', (req, res, next) => {
                         title: $('.secondMain .hd h3').text(),
                         updateTime: $('.secondMain .hd span').eq(0).text(),
                         imgUrl: $('.secondFocus .con li').eq(0).children().eq(0).attr('src'),
-                        labels: he.decode($('div[class=fl]>table>tr>td>span').eq(8).html().replace(/	|\s/gi, '')).split(/\s/gi).slice(0, -1),
+                        labels: he.decode($('div[class=fl]>table>tr>td>span').eq(8).html().replace(/    |\s/gi, '')).split(/\s/gi).slice(0, -1),
                         basicInfo: utils.formatBasicInfo($),
                         description: $('.infoContent').html()
                     };
@@ -74,16 +78,46 @@ app.get('/', (req, res, next) => {
     });
 
     ep.after('fetch_all', maxFetchCount, (records) => {
-
-        res.render('content', {
-            records: records
-        });
+        rentInfo = rentInfo.concat(records);
+        console.log(req.url === '/');
+        if (req.url === '/') {
+            res.render('index', {
+                records: rentInfo.slice(0, curCnt++)
+            });
+        } else {
+            console.log('emmit fetch_more');
+            ep.done('fetch_more');
+        }
     });
 
     ep.fail((err) => {
         next(err);
     });
 
+    ep.done('fetch');
+
+});
+
+app.get('/more', (req, res, next) => {
+    console.log(curCnt);
+    if (curCnt === 2) {
+        ep.on('fetch_more', () => {
+            console.log('fetch_more called');
+            res.render('index', {
+                records: rentInfo.slice(0, curCnt++)
+            })
+        });
+    }
+    console.log(curCnt, rentInfo.length);
+    if (curCnt <= rentInfo.length) {
+        res.render('index', {
+            records: rentInfo.slice(0, curCnt++)
+        })
+
+    } else {
+        console.log('fetch');
+        ep.done('fetch');
+    }
 });
 
 app.listen(3000, () => {
