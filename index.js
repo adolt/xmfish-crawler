@@ -25,9 +25,8 @@ const rentCode = {
 const baseUrl = 'http://fangzi.xmfish.com';
 const maxFetchCount = 6; // 并发数 >6 时挂掉
 
-var curCnt = 1;
-var rentInfo = [];
-// var ret = [];
+var curCnt = 1;  // 当前页面信息条数
+var rentInfo = [];  // 爬下来的信息缓存
 
 // 组装查询参数(后续界面查询使用)
 var rent = '',
