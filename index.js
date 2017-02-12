@@ -114,8 +114,9 @@ app.get('/more', (req, res, next) => {
         })
 
     } else {
-        console.log('fetch');
-        ep.done('fetch');
+        // 继续fetch记录，有点难搞...
+        // console.log('fetch');
+        // ep.done('fetch');
     }
 });
 
