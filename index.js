@@ -25,9 +25,8 @@ const rentCode = {
 const baseUrl = 'http://fangzi.xmfish.com';
 const maxFetchCount = 6; // 并发数 >6 时挂掉
 
-var curCnt = 1;  // 当前页面信息条数
-var rentInfo = [];  // 爬下来的信息缓存
-
+var rentInfo = [];
+var curCnt = 1;
 // 组装查询参数(后续界面查询使用)
 var rent = '',
     keywords = '',
@@ -42,7 +41,7 @@ app.set('view engine', 'ejs');
 
 app.get('/', (req, res, next) => {
 
-    ep.on('fetch', superagent.get(baseUrl + queryStr)
+    ep.on('request', superagent.get(baseUrl + queryStr)
         .end(ep.doneLater('query', (sres) => {
             var $ = cheerio.load(sres.text, { decodeEntities: true });
 
@@ -51,7 +50,7 @@ app.get('/', (req, res, next) => {
                 let curUrl = $(cur).attr('href');
                 urls.push(baseUrl + curUrl);
             });
-
+            console.log(urls);
             return urls;
         })));
 
@@ -78,46 +77,26 @@ app.get('/', (req, res, next) => {
 
     ep.after('fetch_all', maxFetchCount, (records) => {
         rentInfo = rentInfo.concat(records);
-        console.log(req.url === '/');
-        if (req.url === '/') {
-            res.render('index', {
-                records: rentInfo.slice(0, curCnt++)
-            });
-        } else {
-            console.log('emmit fetch_more');
-            ep.done('fetch_more');
-        }
+
+        ep.emit('load');
+    });
+
+    ep.on('load', () => {
+        res.render('index', {
+            records: rentInfo.slice(0, curCnt++)
+        });
     });
 
     ep.fail((err) => {
         next(err);
     });
 
-    ep.done('fetch');
-
-});
-
-app.get('/more', (req, res, next) => {
-    console.log(curCnt);
-    if (curCnt === 2) {
-        ep.on('fetch_more', () => {
-            console.log('fetch_more called');
-            res.render('index', {
-                records: rentInfo.slice(0, curCnt++)
-            })
-        });
-    }
-    console.log(curCnt, rentInfo.length);
-    if (curCnt <= rentInfo.length) {
-        res.render('index', {
-            records: rentInfo.slice(0, curCnt++)
-        })
-
+    if (curCnt % 6 === 1) {
+        ep.done('request');
     } else {
-        // 继续fetch记录，有点难搞...
-        // console.log('fetch');
-        // ep.done('fetch');
+        ep.emit('load');
     }
+
 });
 
 app.listen(3000, () => {
