@@ -23,14 +23,15 @@ const ep = eventproxy.create();
 // };
 
 const baseUrl = 'http://fangzi.xmfish.com';
-const maxFetchCount = 6; // 并发数 >6 时挂掉
+const fetchCount = 4; // 并发数 >6 时挂掉
 
 let rentInfo = [];
 let curCnt = 1;
 // 组装查询参数(后续界面查询使用)
 const rent = '';
 const keywords = '';
-const pageIndex = '1';
+let innerPageIdx = 0;
+let pageIndex = 1;
 
 const queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rent}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
 
@@ -40,12 +41,15 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res, next) => {
-  ep.on('request', superagent.get(baseUrl + queryStr)
-    .end(ep.doneLater('query', (sres) => {
+  ep.once('request', superagent.get(baseUrl + queryStr)
+    .end(ep.done('query', (sres) => {
+      if (curCnt <= rentInfo.length) {
+        return null;
+      }
       const $ = cheerio.load(sres.text, { decodeEntities: true });
 
       const urls = [];
-      Array.prototype.slice.call($('.list-img a')).slice(0, maxFetchCount).forEach((cur) => {
+      Array.prototype.slice.call($('.list-img a')).slice(innerPageIdx * fetchCount, (innerPageIdx + 1) * fetchCount).forEach((cur) => {
         const curUrl = $(cur).attr('href');
         urls.push(baseUrl + curUrl);
       });
@@ -53,49 +57,62 @@ app.get('/', (req, res, next) => {
       return urls;
     })));
 
-  ep.on('query', (urls) => {
-    urls.forEach((curUrl) => {
-      superagent.get(curUrl)
-        .end(ep.group('fetch_all', (sres) => {
-          console.log(`fetch ${curUrl} successfully`);
+  ep.once('query', (urls) => {
+    if (urls !== null) {
+      urls.forEach((curUrl) => {
+        superagent.get(curUrl)
+          .end(ep.group('fetch_all', (sres) => {
+            console.log(`fetch ${curUrl} successfully`);
 
-          const $ = cheerio.load(sres.text);
+            const $ = cheerio.load(sres.text);
 
-          return {
-            title: $('.secondMain .hd h3').text(),
-            updateTime: $('.secondMain .hd span').eq(0).text(),
-            imgUrl: $('.secondFocus .con li').eq(0).children().eq(0)
-              .attr('src'),
-            labels: he.decode($('div[class=fl]>table>tr>td>span').eq(8).html().replace(/[ ]{4}|\s/gi, '')).split(/\s/gi).slice(0, -1),
-            basicInfo: utils.formatBasicInfo($),
-            description: $('.infoContent').html(),
-          };
-        }));
-    });
+            return {
+              title: $('.secondMain .hd h3').text(),
+              updateTime: $('.secondMain .hd span').eq(0).text(),
+              imgUrl: $('.secondFocus .con li').eq(0).children().eq(0)
+                .attr('src'),
+              labels: he.decode($('div[class=fl]>table>tr>td>span').eq(8).html().replace(/[ ]{4}|\s/gi, '')).split(/\s/gi).slice(0, -1),
+              basicInfo: utils.formatBasicInfo($),
+              description: $('.infoContent').html(),
+            };
+          }));
+      });
+    }
   });
 
-  ep.after('fetch_all', maxFetchCount, (records) => {
+  ep.after('fetch_all', fetchCount, (records) => {
     rentInfo = rentInfo.concat(records);
 
     ep.emit('load');
   });
 
-  ep.on('load', () => {
-    res.render('index', {
-      records: rentInfo.slice(0, curCnt),
-    });
-    curCnt += 1;
+  ep.once('load', () => {
+    if (!res.headersSent) {
+      res.render('index', {
+        records: rentInfo.slice(0, curCnt),
+      });
+    }
   });
 
   ep.fail((err) => {
     next(err);
   });
 
-  if (curCnt % 6 === 1) {
+  if (curCnt % 4 === 1) {
+    innerPageIdx += 1;
+    if (innerPageIdx === 20) {
+      pageIndex += 1; // 单页76条, 4 * 19时单页获取完
+      innerPageIdx = 0;
+    }
     ep.done('request');
   } else {
     ep.emit('load');
   }
+});
+
+app.get('/more', (req, res) => {
+  curCnt += 1;
+  res.redirect('..');
 });
 
 app.listen(3000, () => {
