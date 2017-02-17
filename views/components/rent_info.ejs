@@ -1,44 +1,44 @@
 <div class="item">
-    <div class="ui small image">
-        <img src="<%= record.imgUrl %>">
+  <div class="ui small image">
+    <img src="<%= record.imgUrl %>">
+  </div>
+  <div class="content">
+    <div class="header">
+      <%= record.title %>
     </div>
-    <div class="content">
-        <div class="header">
-            <%= record.title %>
-        </div>
-        <div class="meta">
-            <span><%= record.updateTime %></span>
-        </div>
-        <div class="description">
-            <div class="ui horizontal list">
-                <% for(let attr of Object.keys(record.basicInfo)) { %>
-                <div class="item">
-                    <div class="content">
-                        <a class="ui label">
-                            <%= record.basicInfo[attr] %>
-                        </a>
-                    </div>
-                </div>
-                <% } %>
-            </div>
-            <p>
-                <% record.labels.forEach((label) => { %>
-                <a class="ui basic label">
-                    <%= label %>
-                </a>
-                <% }) %>
-                <br>
-            </p>
-            <div class="ui animated fade button" tabindex="0">
-			  <div class="visible content">Description</div>
-			  <div class="hidden content">
-			    View more
-			  </div>
-			</div>
-            <div style="display: none;">
-            	<%= record.description %>
-            </div>
-        </div>
+    <div class="meta">
+      <span><%= record.updateTime %></span>
     </div>
+    <div class="description">
+      <div class="ui horizontal list">
+        <% for(let attr of Object.keys(record.basicInfo)) { %>
+          <div class="item">
+            <div class="content">
+              <a class="ui label">
+                <%= record.basicInfo[attr] %>
+              </a>
+            </div>
+          </div>
+        <% } %>
+      </div>
+      <p>
+        <% record.labels.forEach((label) => { %>
+          <a class="ui basic label">
+            <%= label %>
+          </a>
+        <% }) %>
+        <br>
+      </p>
+      <div class="ui animated fade button" tabindex="0">
+        <div class="visible content">Description</div>
+        <div class="hidden content">
+          View more
+        </div>
+      </div>
+      <div style="display: none;">
+        <%= record.description %>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="ui section divider"></div>
