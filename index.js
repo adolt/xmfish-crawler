@@ -30,7 +30,7 @@ let curCnt = 1;
 // 组装查询参数(后续界面查询使用)
 const rent = '';
 const keywords = '';
-let innerPageIdx = 0;
+let innerPageIdx = -1;
 let pageIndex = 1;
 
 const queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rent}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
@@ -80,10 +80,16 @@ app.get('/', (req, res, next) => {
     }
   });
 
+  let i = 0;
   ep.after('fetch_all', fetchCount, (records) => {
-    rentInfo = rentInfo.concat(records);
-
-    ep.emit('load');
+    records.forEach(() => {
+      i += 1;
+    });
+    if (i === fetchCount && curCnt > rentInfo.length) {
+      rentInfo = rentInfo.concat(records);
+      i = 0;
+      ep.emit('load');
+    }
   });
 
   ep.once('load', () => {
