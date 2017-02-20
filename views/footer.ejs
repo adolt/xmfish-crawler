@@ -2,6 +2,7 @@
 	<%- include('components/desc_modal') %>
 	<script>
 		$(function($) {
+			$('.dropdown').dropdown();
 			$('div .ui .animated').on('click', function(e) {
 			  var $target = $(this);
 				let description = $target.next().text();
