@@ -21,6 +21,7 @@ let innerPageIdx = -1; // 单页内部页数
 // 组装查询参数
 // 租金范围 对应 url中s参数的值
 const rentCode = {
+  undefined: '',
   '0-': '',
   '0-3': 100,
   '3-5': 101,
@@ -32,7 +33,12 @@ const rentCode = {
 };
 let rent = '';
 let keywords = '';
-const queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rent}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
+const queryStr = `/web/search_hire.html?h=&hf=&ca=&r=&s=${rentCode[rent]}&a=&rm=&f=&d=&tp=&l=0&tg=&hw=&o=&ot=1&xiaoqu=${keywords}&tst=0&page=${pageIndex}`;
+
+app.locals.filter = {
+  key: keywords,
+  range: rent,
+};
 
 // 设置模板目录
 app.set('views', path.join(__dirname, 'views'));
@@ -122,10 +128,15 @@ app.get('/more', (req, res) => {
   res.redirect('..');
 });
 
-app.post('/query', (req, res) => {
-  keywords = req.param.keywords;
-  rent = rentCode[req.param.range];
-  res.redirect('..');
+app.get('/query', (req, res) => {
+  keywords = req.query.keywords;
+  rent = req.query.range;
+  rentInfo = [];
+  curCnt = 1;
+  pageIndex = 1;
+  innerPageIdx = -1;
+
+  res.end();
 });
 
 app.listen(3000, () => {

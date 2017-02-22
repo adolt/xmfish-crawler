@@ -1,14 +1,14 @@
 <div class="ui centered row">
-<form class="ui form" method="post" action="/query">
+<form class="ui form">
   <div class="inline fields">
   <div class="inline field">
     <label>关键字</label>
-    <input type="text" name="keywords" placeholder="无">
+    <input type="text" id="keywords" placeholder="无" value="<%=filter.key %>">
   </div>
   <div class="inline field">
       <label>租金范围</label>
       <div class="ui selection dropdown">
-          <input type="hidden" name="range">
+          <input type="hidden" id="range" value="<%=filter.range %>">
           <i class="dropdown icon"></i>
           <div class="default text">不限</div>
           <div class="menu">
@@ -22,7 +22,7 @@
           </div>
       </div>
   </div>
-  <input type="submit" class="ui icon button">
+  <button id="queryBtn" class="ui icon button"><i class="ui search icon"></i></button>
   </div>
 </form>
 </div>

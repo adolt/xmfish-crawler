@@ -13,6 +13,14 @@
 				$('#more').hide();
 				$('.loader').show();
 			});
+			$('#queryBtn').on('click', function() {
+				$.get('/query', {
+					keywords: $('#keywords').val(),
+					range: $('#range').val()
+				}, function() {
+					// $.get('/');
+				});
+			})
 			document.getElementById('more').scrollIntoView();
 		});
 </script>
